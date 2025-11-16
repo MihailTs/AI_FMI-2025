@@ -30,9 +30,7 @@ public class NQueens {
         diagonalRLCnt = new int[2 * n - 1];
         diagonalLLCnt = new int[2 * n - 1];
 
-        int minConflictsIterations = n;
-        if(n > 1000) minConflictsIterations *= n / 10;
-        else minConflictsIterations *= 200;
+        int minConflictsIterations = Math.min(n * 200, 200000);
 
         AtomicBoolean solved = new AtomicBoolean(false);
         minConflicts(minConflictsIterations, solved);
