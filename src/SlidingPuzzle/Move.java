@@ -4,7 +4,7 @@ public class Move implements Comparable<Move> {
 
     static int cnt = 0;
     int selfCnt;
-    int[][] board;
+//    int[][] board;
     int numberChanged;
     int oldRow, oldCol, newRow, newCol;
     // manhatton distance after move
@@ -16,8 +16,8 @@ public class Move implements Comparable<Move> {
     int zeroGoalPosition;
 
     // to create the initial move
-    public Move(int[][] board, int boardSize, int manhattonDistance, int zeroRow, int zeroCol) {
-        this.board = board;
+    public Move(int boardSize, int manhattonDistance, int zeroRow, int zeroCol) {
+//        this.board = board;
         this.previous = null;
         this.numberChanged = -1;
         this.prevMovesCount = 0;
@@ -30,16 +30,17 @@ public class Move implements Comparable<Move> {
         this.manhattonDistance = manhattonDistance;
     }
 
-    public Move(Move previous, int[][] board, int numberChanged, int prevMovesCount, int oldRow, int oldCol,
+    public Move(Move previous, int numberChanged, int prevMovesCount, int oldRow, int oldCol,
                     int newRow, int newCol, int boardSize, int manhattonDistance, int zeroGoalPosition) {
-        this.board = board;
-        // make the move on the board
-        this.board[oldRow][oldCol] = 0;
-        this.board[newRow][newCol] = numberChanged;
+//        this.board = board;
+//        // make the move on the board
+//        this.board[oldRow][oldCol] = 0;
+//        this.board[newRow][newCol] = numberChanged;
 
         this.previous = previous;
         this.numberChanged = numberChanged;
         this.prevMovesCount = prevMovesCount;
+        // coordinates of the number moved (old and new)
         this.oldRow = oldRow;
         this.oldCol = oldCol;
         this.newRow = newRow;

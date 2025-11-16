@@ -72,9 +72,10 @@ public class FrogLeap {
         int spacePosition = n;
         int helpCnt = 3;
 
-        System.out.println(state);
+        System.out.print(state);
         while(stepCnt > 0) {
             for(int i = 0; i < stepCnt; i++) {
+                System.out.println();
                 if(leftFrTurn) {
                     if(state.charAt(spacePosition - 1) == '>') {
                         state.setCharAt(spacePosition, '>');
@@ -96,7 +97,7 @@ public class FrogLeap {
                         spacePosition += 2;
                     }
                 }
-                System.out.println(state);
+                System.out.print(state);
             }
 
             leftFrTurn = !leftFrTurn;

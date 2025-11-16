@@ -1,21 +1,24 @@
 package SlidingPuzzle;
 
 import java.util.Arrays;
-import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SlidingPuzzle {
+
+    public static int[][] board;
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
 
         int n = sc.nextInt();
         int zeroGoalPosition = sc.nextInt();
+        if(zeroGoalPosition == -1) {
+            zeroGoalPosition = n;
+        }
         int size = (int) Math.sqrt(n + 1);
-
-        int[][] board = new int[size][size];
+        board = new int[size][size];
         int zeroRow = -1;
         int zeroCol = -1;
 
@@ -27,69 +30,137 @@ public class SlidingPuzzle {
                     zeroCol = j;
                 }
             }
-            sc.nextLine();
         }
 
-        if(!checkSolvable(board, size)) {
-            System.out.println(-1);
+        if(!checkSolvable(size)) {
+            System.out.print(-1);
             return;
         }
 
-        int initManhDist = manhattonDistance(board, size, zeroGoalPosition);
-        IDAStar(board, size, initManhDist, zeroRow, zeroCol, zeroGoalPosition);
+        int initManhDist = manhattonDistance(size, zeroGoalPosition);
+        IDAStar(size, initManhDist, zeroRow, zeroCol, zeroGoalPosition);
     }
 
-    private static void IDAStar(int[][] board, int size, int initManhDist,
+    private static void IDAStar(int size, int initManhDist,
                                 int zeroRow, int zeroCol, int zeroGoalPosition) {
         AtomicBoolean solutionFound = new AtomicBoolean(false);
-        int limit = 1;
-        while(limit < 35) {
-            AStarLimit(board, size, initManhDist, zeroRow, zeroCol, zeroGoalPosition, limit, solutionFound);
+        int limit = initManhDist;
+        while(true) {
+//            System.out.println(limit);
+            Move root = new Move(size, initManhDist, zeroRow, zeroCol);
+            HeuristicDFS(root, size, zeroGoalPosition, limit, solutionFound);
+//            AStarLimit(board, size, initManhDist, zeroRow, zeroCol, zeroGoalPosition, limit, solutionFound);
             if(solutionFound.get()) break;
             limit++;
         }
     }
 
-    private static void AStarLimit(int[][] board, int size, int initManhDist, int zeroRow,
-                                   int zeroCol, int zeroGoalPosition,  int limit, AtomicBoolean solutionFound) {
-        PriorityQueue<Move> pq = new PriorityQueue<>();
+//    private static void AStarLimit(int size, int initManhDist, int zeroRow,
+//                                   int zeroCol, int zeroGoalPosition,  int limit, AtomicBoolean solutionFound) {
+//        PriorityQueue<Move> pq = new PriorityQueue<>();
+//
+//        pq.add(new Move(copyBoard(board), size, initManhDist, zeroRow, zeroCol));
+//
+//        while(!pq.isEmpty()) {
+//            Move m = pq.poll();
+//            // we have found a solution
+//            if(m.manhattonDistance == 0) {
+//                solutionFound.set(true);
+//                recoverSolution(m);
+//                break;
+//            }
+//
+//            zeroRow = m.oldRow;
+//            zeroCol = m.oldCol;
+//
+//            if(m.prevMovesCount >= limit) continue;
+//
+//            // move down
+//            if(zeroRow > 0 && m.previous != null && ) {
+//                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow - 1][zeroCol], m.prevMovesCount + 1,
+//                            zeroRow - 1, zeroCol, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+//            }
+//            // move right
+//            if(zeroCol > 0) {
+//                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow][zeroCol - 1], m.prevMovesCount + 1,
+//                        zeroRow, zeroCol - 1, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+//            }
+//            // move up
+//            if(zeroRow < size - 1) {
+//                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow + 1][zeroCol], m.prevMovesCount + 1,
+//                        zeroRow + 1, zeroCol, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+//            }
+//            // move left
+//            if(zeroCol < size - 1) {
+//                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow][zeroCol + 1], m.prevMovesCount + 1,
+//                        zeroRow, zeroCol + 1, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+//            }
+//        }
+//    }
 
-        pq.add(new Move(copyBoard(board), size, initManhDist, zeroRow, zeroCol));
+    public static void HeuristicDFS(Move root, int size, int zeroGoalPosition,
+                                    int limit, AtomicBoolean solutionFound) {
+        if(solutionFound.get()) return;
 
-        while(!pq.isEmpty()) {
-            Move m = pq.poll();
-            // we have found a solution
-            if(m.manhattonDistance == 0) {
-                solutionFound.set(true);
-                recoverSolution(m);
-                break;
-            }
+        if(root.prevMovesCount + root.manhattonDistance > limit) {
+            return;
+        }
+        if(root.manhattonDistance == 0) {
+            solutionFound.set(true);
+            recoverSolution(root);
+            return;
+        }
 
-            zeroRow = m.oldRow;
-            zeroCol = m.oldCol;
+        int zeroRow = root.oldRow;
+        int zeroCol = root.oldCol;
 
-            if(m.prevMovesCount >= limit) continue;
-
-            // move down
-            if(zeroRow > 0) {
-                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow - 1][zeroCol], m.prevMovesCount + 1,
-                            zeroRow - 1, zeroCol, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+        // move down
+        if(!solutionFound.get() && zeroRow > 0 && !(root.oldRow > root.newRow)) {
+            Move next = new Move(root, board[zeroRow - 1][zeroCol], root.prevMovesCount + 1,
+                    zeroRow - 1, zeroCol, zeroRow, zeroCol, size, root.manhattonDistance, zeroGoalPosition);
+            board[zeroRow][zeroCol] = board[zeroRow - 1][zeroCol];
+            board[zeroRow - 1][zeroCol] = 0;
+            if(next.manhattonDistance + next.prevMovesCount <= limit) {
+                HeuristicDFS(next, size, zeroGoalPosition, limit, solutionFound);
             }
-            // move right
-            if(zeroCol > 0) {
-                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow][zeroCol - 1], m.prevMovesCount + 1,
-                        zeroRow, zeroCol - 1, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+            board[zeroRow - 1][zeroCol] = board[zeroRow][zeroCol];
+            board[zeroRow][zeroCol] = 0;
+        }
+        // move right
+        if(!solutionFound.get() && zeroCol > 0 && !(root.oldCol > root.newCol)) {
+            Move next = new Move(root, board[zeroRow][zeroCol - 1], root.prevMovesCount + 1,
+                    zeroRow, zeroCol - 1, zeroRow, zeroCol, size, root.manhattonDistance, zeroGoalPosition);
+            board[zeroRow][zeroCol] = board[zeroRow][zeroCol - 1];
+            board[zeroRow][zeroCol - 1] = 0;
+            if(next.manhattonDistance + next.prevMovesCount <= limit) {
+                HeuristicDFS(next, size, zeroGoalPosition, limit, solutionFound);
             }
-            // move up
-            if(zeroRow < size - 1) {
-                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow + 1][zeroCol], m.prevMovesCount + 1,
-                        zeroRow + 1, zeroCol, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+            board[zeroRow][zeroCol - 1] = board[zeroRow][zeroCol];
+            board[zeroRow][zeroCol] = 0;
+        }
+        // move up
+        if(!solutionFound.get() && zeroRow < size - 1 && !(root.oldRow < root.newRow)) {
+            Move next = new Move(root, board[zeroRow + 1][zeroCol], root.prevMovesCount + 1,
+                    zeroRow + 1, zeroCol, zeroRow, zeroCol, size, root.manhattonDistance, zeroGoalPosition);
+            board[zeroRow][zeroCol] = board[zeroRow + 1][zeroCol];
+            board[zeroRow + 1][zeroCol] = 0;
+            if(next.manhattonDistance + next.prevMovesCount <= limit) {
+                HeuristicDFS(next, size, zeroGoalPosition, limit, solutionFound);
             }
-            // move left
-            if(zeroCol < size - 1) {
-                pq.add(new Move(m, copyBoard(m.board), m.board[zeroRow][zeroCol + 1], m.prevMovesCount + 1,
-                        zeroRow, zeroCol + 1, zeroRow, zeroCol, size, m.manhattonDistance, zeroGoalPosition));
+            board[zeroRow + 1][zeroCol] = board[zeroRow][zeroCol];
+            board[zeroRow][zeroCol] = 0;
+        }
+        // move left
+        if(!solutionFound.get() && zeroCol < size - 1 && !(root.oldCol < root.newCol)) {
+            Move next = new Move(root, board[zeroRow][zeroCol + 1], root.prevMovesCount + 1,
+                    zeroRow, zeroCol + 1, zeroRow, zeroCol, size, root.manhattonDistance, zeroGoalPosition);
+            board[zeroRow][zeroCol] = board[zeroRow][zeroCol + 1];
+            board[zeroRow][zeroCol + 1] = 0;
+            if(next.manhattonDistance + next.prevMovesCount <= limit) {
+                HeuristicDFS(next, size, zeroGoalPosition, limit, solutionFound);
             }
+            board[zeroRow][zeroCol + 1] = board[zeroRow][zeroCol];
+            board[zeroRow][zeroCol] = 0;
         }
     }
 
@@ -105,41 +176,36 @@ public class SlidingPuzzle {
             m = m.previous;
         }
 
-        System.out.println(stack.size());
+        System.out.print(stack.size());
         while(!stack.isEmpty()) {
-            System.out.println(stack.pop());
+            System.out.print("\n" + stack.pop());
         }
-    }
-
-    private static int[][] copyBoard(int[][] board) {
-        int[][] boardCopy = new int[board.length][];
-        for(int i = 0; i < board.length; i++) {
-            boardCopy[i] = Arrays.copyOf(board[i], board[i].length);
-        }
-        return boardCopy;
     }
 
     // In summary, when n is odd, an n-by-n board is solvable if and only if its number of inversions is even.
     // That is, when n is even, an n-by-n board is solvable if and only if the number of inversions
-    // plus the row of the blank square is odd.
-    private static boolean checkSolvable(int[][] board, int size) {
+    // plus the row of the blank square (from bottom up) is odd.
+    private static boolean checkSolvable(int size) {
         int[] flatArray = new int[size * size - 1];
+        // counting from the bottom up
         int rowOfEmpty = -1;
+        int idx = 0;
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
                 if(board[i][j] == 0)
-                    rowOfEmpty = i;
+                    rowOfEmpty = size - i - 1;
                 else
-                    flatArray[i * size + j - ((rowOfEmpty == -1)? 0 : 1)] = board[i][j];
+                    flatArray[idx++] = board[i][j];
             }
         }
 
         int[] temp = new int[size * size - 1];
-        int invCnt = mergeSortAndCount(flatArray, temp, 0, size * size - 1);
+        int invCnt = mergeSortAndCount(flatArray, temp, 0, flatArray.length);
+
         if(size % 2 == 1)
             return invCnt % 2 == 0;
         else
-            return invCnt + rowOfEmpty % 2 == 1;
+            return (invCnt + rowOfEmpty) % 2 == 0;
     }
 
     // Merge sort modification that counts inversions
@@ -176,7 +242,7 @@ public class SlidingPuzzle {
         return invCnt;
     }
 
-    public static int manhattonDistance(int[][] board, int size, int zeroGoalPosition) {
+    public static int manhattonDistance(int size, int zeroGoalPosition) {
         int dist = 0;
         for(int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {

@@ -1,0 +1,12 @@
+The input is a positive integer n (up to 10,000 ±10).
+Output -1 when n ∈ {2,3}; otherwise print a one-dimensional
+representation of a solution as a permutation where each index
+is a column and each value is the row of the queen (0- or 1-based accepted),
+e.g. [2, 0, 3, 1].
+The output may be a simple list of values rather than strict array notation.
+
+Input
+4
+
+Output
+[2, 0, 3, 1]
