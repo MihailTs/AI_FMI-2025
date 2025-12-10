@@ -1,0 +1,7 @@
+The game has a playing field of 2N+1 fields,
+wherein at the beginning in the rightmost N fields we have frogs,
+looking to the left, and in the leftmost N fields - frogs, looking to the right.
+The whole point of the game is to swap the frogs and get to the opposite configuration
+The rules of the game are: each frog can only move in the direction it is facing.
+Each frog can jump to an empty space in front of it or jump over a frog,
+to go to an empty space in front of it.

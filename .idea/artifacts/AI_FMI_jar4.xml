@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="AI_FMI:jar4">
+    <output-path>$PROJECT_DIR$/out/artifacts/AI_FMI_jar4</output-path>
+    <root id="archive" name="AI_FMI.jar">
+      <element id="module-output" name="AI_FMI" />
+    </root>
+  </artifact>
+</component>
